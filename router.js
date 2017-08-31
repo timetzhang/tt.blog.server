@@ -40,9 +40,34 @@ router.get('/getArticle', async(req, res) => {
             "category": req.query.category
         }
     }
+    if (req.query.keyword) {
+        condition = {
+            "keywords": req.query.keyword
+        }
+    }
     let articles = await db.find('blog_article', condition, { "details": 0 }, { time: -1 })
 
     await res.send(articles)
+});
+router.get('/getTop10Article', async(req, res) => {
+    setHeadJson(res)
+        // get datas
+    let collection = 'blog_article';
+    let condition = {};
+    let select = { name: 1 };
+    let sort = { view_count: -1 };
+    let limit = 10;
+    let skip = 0;
+    let articles = await db.find(collection, condition, select, sort, limit, skip);
+
+    await res.send(articles)
+});
+router.get('/getHotKeywords', async(req, res) => {
+    setHeadJson(res)
+        // get datas
+    let keywords = await db.find('blog_hot_keywords', {}, {}, {})
+
+    await res.send(keywords)
 });
 router.get('/getArticleDetails', async(req, res) => {
     setHeadJson(res)
@@ -71,6 +96,7 @@ router.post('/newArticle', async(req, res) => {
         "brief": data.brief,
         "category": data.category,
         "image": data.image,
+        "keywords": data.keywords,
         "details": data.details,
         "time": new Date(),
         "view_count": 1
@@ -86,6 +112,7 @@ router.post('/setArticle', async(req, res) => {
         "brief": data.brief,
         "category": data.category,
         "image": data.image,
+        "keywords": data.keywords,
         "details": data.details,
         "time": new Date()
     });

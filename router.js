@@ -33,10 +33,19 @@ var setHeadJson = function(res) {
 /*--------------------------------------------------------------------------------------------------------*/
 router.get('/getArticle', async(req, res) => {
     setHeadJson(res)
-        // get datas
-    let condition = {};
+    let pagesize = parseInt(req.query.pagesize)
+    let pagenum = parseInt(req.query.pagenum)
+
+    let query = {
+        collection: 'blog_article',
+        condition: {},
+        projection: { "details": 0 },
+        sort: { time: -1 },
+        limit: pagesize,
+        skip: pagenum * pagesize
+    };
     if (req.query.category) {
-        condition = {
+        query.condition = {
             "category": req.query.category
         }
     }
@@ -45,42 +54,64 @@ router.get('/getArticle', async(req, res) => {
             "keywords": req.query.keyword
         }
     }
-    let articles = await db.find('blog_article', condition, { "details": 0 }, { time: -1 })
+    let articles = await db.find(query)
 
     await res.send(articles)
 });
 router.get('/getTop10Article', async(req, res) => {
     setHeadJson(res)
         // get datas
-    let collection = 'blog_article';
-    let condition = {};
-    let select = { name: 1 };
-    let sort = { view_count: -1 };
-    let limit = 10;
-    let skip = 0;
-    let articles = await db.find(collection, condition, select, sort, limit, skip);
+    let query = {
+        collection: 'blog_article',
+        condition: {},
+        projection: { name: 1 },
+        sort: { view_count: -1 },
+        limit: 10,
+        skip: 0
+    };
+    let articles = await db.find(query);
 
     await res.send(articles)
 });
 router.get('/getHotKeywords', async(req, res) => {
     setHeadJson(res)
         // get datas
-    let keywords = await db.find('blog_hot_keywords', {}, {}, {})
+    let query = {
+        collection: 'blog_hot_keywords',
+        condition: {},
+        projection: {},
+        sort: {},
+        limit: 0,
+        skip: 0
+    };
+    let keywords = await db.find(query)
 
     await res.send(keywords)
 });
 router.get('/getArticleDetails', async(req, res) => {
     setHeadJson(res)
         // get datas
-    let condition = {};
-    if (req.query.id) {
-        condition = {
-            "_id": ObjectId(req.query.id)
-        }
-    }
-    let details = await db.find('blog_article', { _id: ObjectId(req.query.id) });
-    let comments = await db.find('blog_article_comment', { article_id: ObjectId(req.query.id) }, {}, { time: -1 });
-    let result = await db.update('blog_article', { _id: ObjectId(req.query.id) }, { view_count: details[0].view_count + 1 });
+
+    let details = await db.find({
+        collection: 'blog_article',
+        condition: { _id: ObjectId(req.query.id) },
+        limit: 1,
+        skip: 0
+    });
+
+    let comments = await db.find({
+        collection: 'blog_article_comment',
+        condition: { article_id: ObjectId(req.query.id) },
+        projection: {},
+        sort: { time: -1 },
+        limit: 0,
+        skip: 0
+    });
+    let result = await db.update({
+        collection: 'blog_article',
+        condition: { _id: ObjectId(req.query.id) },
+        data: { view_count: details[0].view_count + 1 }
+    });
     let article = {
         details: details[0],
         comments: comments
@@ -91,15 +122,19 @@ router.get('/getArticleDetails', async(req, res) => {
 router.post('/newArticle', async(req, res) => {
     setHeadJson(res);
     let data = JSON.parse(JSON.stringify(req.body.data));
-    let result = await db.insert('blog_article', {
-        "name": data.name,
-        "brief": data.brief,
-        "category": data.category,
-        "image": data.image,
-        "keywords": data.keywords,
-        "details": data.details,
-        "time": new Date(),
-        "view_count": 1
+
+    let result = await db.insert({
+        collection: 'blog_article',
+        data: {
+            "name": data.name,
+            "brief": data.brief,
+            "category": data.category,
+            "image": data.image,
+            "keywords": data.keywords,
+            "details": data.details,
+            "time": new Date(),
+            "view_count": 1
+        }
     });
     res.send(result);
 });
@@ -107,14 +142,18 @@ router.post('/newArticle', async(req, res) => {
 router.post('/setArticle', async(req, res) => {
     setHeadJson(res);
     let data = JSON.parse(JSON.stringify(req.body.data));
-    let result = await db.update('blog_article', { _id: ObjectId(data._id) }, {
-        "name": data.name,
-        "brief": data.brief,
-        "category": data.category,
-        "image": data.image,
-        "keywords": data.keywords,
-        "details": data.details,
-        "time": new Date()
+    let result = await db.update({
+        collection: 'blog_article',
+        condition: { _id: ObjectId(data._id) },
+        data: {
+            "name": data.name,
+            "brief": data.brief,
+            "category": data.category,
+            "image": data.image,
+            "keywords": data.keywords,
+            "details": data.details,
+            "time": new Date()
+        }
     });
     res.send(result);
 });
@@ -123,32 +162,17 @@ router.post('/setArticle', async(req, res) => {
 router.post('/newComment', async(req, res) => {
     setHeadJson(res);
     let data = JSON.parse(JSON.stringify(req.body.data));
-    let result = await db.insert('blog_article_comment', {
-        "username": data.username,
-        "email": data.email,
-        "details": data.details,
-        "time": new Date(),
-        "article_id": ObjectId(data.id)
+    let result = await db.insert({
+        collection: 'blog_article_comment',
+        data: {
+            "username": data.username,
+            "email": data.email,
+            "details": data.details,
+            "time": new Date(),
+            "article_id": ObjectId(data.id)
+        }
     });
     res.send(result);
 });
-
-// router.post('/newStudentEntranceExam', function(req, res) {
-//     setHeadJson(res);
-//     var data = JSON.parse(JSON.stringify(req.body.data)); //获取传来的数据数组，exam_id, user_id, details
-//     var sql = "INSERT INTO student_entrance_exam (exam_id, student_id, time, details) VALUES ";
-//     for (var i = 0; i < data.length; i++) {
-//         sql += "('" + data[i].exam_id + "', " + data[i].student_id + ", NOW(), " + data[i].details + "),";
-//     }
-//     sql = sql.substring(0, sql.length - 1) + ';';
-
-//     db.query(sql, function(err, rows, fields) {
-//         if (!err) {
-//             res.send(rows);
-//         } else {
-//             res.send(err);
-//         }
-//     });
-// });
 
 module.exports = router;

@@ -2,13 +2,13 @@
 const DB_CONN_STR = 'mongodb://admin:cl3bkm4fuc@localhost:27017/zhangtt';
 
 module.exports = {
-    find: function(collection, condition, projection, sort, limit, skip) {
+    find: function(query) {
         return new Promise(
             function(resolve) {
                 MongoClient.connect(DB_CONN_STR, function(err, db) {
                     //连接到表 site
-                    var col = db.collection(collection);
-                    col.find(condition, projection).sort(sort).limit(limit).skip(skip).toArray(
+                    var col = db.collection(query.collection);
+                    col.find(query.condition, query.projection).limit(query.limit).skip(query.skip).sort(query.sort).toArray(
                         function(err, result) {
                             if (err) {
                                 console.log('Error:' + err);
@@ -21,13 +21,13 @@ module.exports = {
             }
         );
     },
-    insert: function(collection, data) {
+    insert: function(query) {
         return new Promise(
             function(resolve) {
                 MongoClient.connect(DB_CONN_STR, function(err, db) {
                     //连接到表 site
-                    var col = db.collection(collection);
-                    col.insert(data, function(err, result) {
+                    var col = db.collection(query.collection);
+                    col.insert(query.data, function(err, result) {
                         if (err) {
                             console.log('Error:' + err);
                             return;
@@ -39,13 +39,13 @@ module.exports = {
             }
         )
     },
-    update: function(collection, condition, data) {
+    update: function(query) {
         return new Promise(
             function(resolve) {
                 MongoClient.connect(DB_CONN_STR, function(err, db) {
                     //连接到表 site
-                    var col = db.collection(collection);
-                    col.update(condition, { '$set': data }, function(err, result) {
+                    var col = db.collection(query.collection);
+                    col.update(query.condition, { '$set': query.data }, function(err, result) {
                         if (err) {
                             console.log('Error:' + err);
                             return;

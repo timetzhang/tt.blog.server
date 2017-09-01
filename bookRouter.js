@@ -35,7 +35,7 @@ router.get('/searchBook', async(req, res) => {
     let query = {
         collection: 'books',
         condition: {
-            name: { $regex: '.' + req.query.search + '.*' }
+            name: { $regex: req.query.search }
         },
         projection: {},
         sort: {},

@@ -48,6 +48,26 @@ router.get('/searchBook', async(req, res) => {
     await res.send(books)
 });
 
+router.post('/newBook', async(req, res) => {
+    setHeadJson(res);
+    let data = JSON.parse(JSON.stringify(req.body.data));
+
+    let result = await db.insert({
+        collection: 'books',
+        data: {
+            "name": data.name,
+            "image": data.image,
+            "subject": data.subject,
+            "type": data.type,
+            "price": data.price,
+            "status": '在库',
+            "isbn": data.isbn,
+            "time": new Date()
+        }
+    });
+    res.send(result);
+});
+
 // router.get('/getArticleDetails', async(req, res) => {
 //     setHeadJson(res)
 //         // get datas
@@ -79,25 +99,7 @@ router.get('/searchBook', async(req, res) => {
 //     await res.send(article)
 // });
 
-// router.post('/newArticle', async(req, res) => {
-//     setHeadJson(res);
-//     let data = JSON.parse(JSON.stringify(req.body.data));
 
-//     let result = await db.insert({
-//         collection: 'blog_article',
-//         data: {
-//             "name": data.name,
-//             "brief": data.brief,
-//             "category": data.category,
-//             "image": data.image,
-//             "keywords": data.keywords,
-//             "details": data.details,
-//             "time": new Date(),
-//             "view_count": 1
-//         }
-//     });
-//     res.send(result);
-// });
 
 // router.post('/setArticle', async(req, res) => {
 //     setHeadJson(res);

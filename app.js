@@ -1,5 +1,6 @@
 ﻿var express = require('express');
-var router = require('./router');
+var blogRouter = require('./blogRouter');
+var bookRouter = require('./bookRouter');
 
 var app = express();
 
@@ -13,7 +14,8 @@ var server = app.listen(9000, function() {
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
-app.use('/', router);
+app.use('/blog', blogRouter);
+app.use('/book', bookRouter);
 
 process.on('uncaughtException', function(err) {
     //打印出错误

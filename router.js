@@ -35,7 +35,6 @@ router.get('/getArticle', async(req, res) => {
     setHeadJson(res)
     let pagesize = parseInt(req.query.pagesize)
     let pagenum = parseInt(req.query.pagenum)
-
     let query = {
         collection: 'blog_article',
         condition: {},
@@ -50,7 +49,7 @@ router.get('/getArticle', async(req, res) => {
         }
     }
     if (req.query.keyword) {
-        condition = {
+        query.condition = {
             "keywords": req.query.keyword
         }
     }

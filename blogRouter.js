@@ -106,14 +106,36 @@ router.get('/getArticleDetails', async(req, res) => {
         limit: 0,
         skip: 0
     });
+
+    let prev = await db.find({
+        collection: 'blog_article',
+        condition: { _id: { '$lt': ObjectId(req.query.id) } },
+        projection: { _id: 1, name: -1 },
+        sort: { _id: -1 },
+        limit: 1,
+        skip: 0
+    });
+
+    let next = await db.find({
+        collection: 'blog_article',
+        condition: { _id: { '$gt': ObjectId(req.query.id) } },
+        projection: { _id: 1, name: 1 },
+        sort: { _id: 1 },
+        limit: 1,
+        skip: 0
+    });
+
     let result = await db.update({
         collection: 'blog_article',
         condition: { _id: ObjectId(req.query.id) },
         data: { view_count: details[0].view_count + 1 }
     });
+
     let article = {
         details: details[0],
-        comments: comments
+        comments: comments,
+        prev: prev[0],
+        next: next[0]
     }
     await res.send(article)
 });

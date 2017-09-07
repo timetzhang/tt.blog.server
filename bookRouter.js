@@ -35,7 +35,10 @@ router.get('/searchBook', async(req, res) => {
     let query = {
         collection: 'books',
         condition: {
-            name: { $regex: req.query.search }
+            '$or': [
+                { name: { $regex: req.query.search } },
+                { isbn: { $regex: req.query.search } }
+            ]
         },
         projection: {},
         sort: {},

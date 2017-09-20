@@ -1,6 +1,7 @@
 ﻿var express = require('express');
 var blogRouter = require('./blogRouter');
 var bookRouter = require('./bookRouter');
+var wordOriginRouter = require('./wordOriginRouter');
 
 var app = express();
 
@@ -16,6 +17,7 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 app.use('/blog', blogRouter);
 app.use('/book', bookRouter);
+app.use('/word_origin', wordOriginRouter);
 
 process.on('uncaughtException', function(err) {
     //打印出错误

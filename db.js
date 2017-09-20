@@ -1,5 +1,5 @@
 ﻿const MongoClient = require('mongodb').MongoClient;
-const DB_CONN_STR = 'mongodb://admin:cl3bkm4fuc@localhost:27017/zhangtt';
+const DB_CONN_STR = 'mongodb://localhost:27017/zhangtt';
 
 module.exports = {
     find: function(query) {

@@ -58,20 +58,36 @@ router.post('/newBook', async(req, res) => {
     setHeadJson(res);
     let data = JSON.parse(JSON.stringify(req.body.data));
 
-    let result = await db.insert({
+    let book = await db.find({
         collection: 'books',
-        data: {
-            "name": data.name,
-            "image": data.image,
-            "subject": data.subject,
-            "type": data.type,
-            "price": data.price,
-            "status": '在库',
-            "isbn": data.isbn,
-            "time": new Date()
-        }
+        condition: { isbn: data.isbn },
+        projection: { _id: 1 },
+        sort: {},
+        limit: 0,
+        skip: 0
     });
-    res.send(result);
+
+    if (book.length == 0) {
+        let result = await db.insert({
+            collection: 'books',
+            data: {
+                "name": data.name,
+                "image": data.image,
+                "subject": data.subject,
+                "type": data.type,
+                "price": data.price,
+                "publisher": data.publisher,
+                "author": data.author,
+                "year": data.year,
+                "status": '在库',
+                "isbn": data.isbn,
+                "time": new Date()
+            }
+        });
+        res.send(result);
+    } else {
+        res.send({ insertedCount: 0 });
+    }
 });
 
 /**
